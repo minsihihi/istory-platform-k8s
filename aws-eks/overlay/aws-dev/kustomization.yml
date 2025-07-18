@@ -1,0 +1,33 @@
+resources:
+  - ../../base/istory-app
+  - ../../base/istory-db
+
+namespace: istory-dev
+
+patches:
+  - path: patch-lb-annotations.yml
+    target:
+      kind: Service
+      name: istory-app-lb
+
+  - path: patch-deploy.yml
+    target:
+      kind: Deployment
+      name: istory-app-deploy
+
+secretGenerator:
+  - name: istory-db-secret
+    envs:
+      - .env.secret
+    # 아래 양식으로 .env.secret 파일을 만드세요
+    # MYSQL_USER=myuser
+    # MYSQL_PASSWORD=myuserpassword
+    # MYSQL_ROOT_PASSWORD=myrootpassword
+
+images:
+  # base/istory-app/istory-app-deploy.yml 내의 이미지 이름과 동일해야 변경됨
+  - name: minsihihi/istory # 변경필요
+    newTag: latest
+
+generatorOptions:
+  disableNameSuffixHash: true

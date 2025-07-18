@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: istory-db
+  labels:
+    app: mysql
+spec:
+  containers:
+    - image: mysql:5.6
+      name: mysql
+      envFrom:
+        - secretRef:
+            name: istory-db-secret
+      ports:
+        - containerPort: 3306
+          name: mysql
+      volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+        - name: initdb
+          mountPath: /docker-entrypoint-initdb.d # mysql 컨테이너가 실행되면 최초로 자동 실행되는 디렉토리
+  volumes:
+    - name: mysql-persistent-storage
+      persistentVolumeClaim:
+        claimName: mysql-pv-claim
+    - name: initdb
+      configMap:
+        name: mysql-initdb-config

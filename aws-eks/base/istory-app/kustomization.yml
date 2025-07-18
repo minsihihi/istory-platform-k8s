@@ -1,0 +1,4 @@
+resources:
+- istory-app-config.yml
+- istory-app-deploy.yml
+- istory-app-lb.yml

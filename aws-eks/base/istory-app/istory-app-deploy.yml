@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  istory-app-deploy
+  labels:
+    app:  istory-app
+spec:
+  selector:
+    matchLabels:
+      app: istory-app
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: istory-app
+    spec:
+      initContainers:
+        - name: check-mysql-ready
+          image: mysql:8.0
+          env:
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: istory-db-secret
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: istory-db-secret
+                  key: MYSQL_PASSWORD
+          command: ['sh',
+                    '-c',
+                    'until mysqladmin ping -u ${MYSQL_USER} -p${MYSQL_PASSWORD} -h istory-db-lb; do echo waiting for database; sleep 2; done;']
+      containers:
+        - name: istory
+          image:  minsihihi/istory:latest # 변경필요
+          envFrom:
+            - configMapRef:
+                name: istory-app-config
+          env:
+            - name: spring.datasource.password
+              valueFrom:
+                secretKeyRef:
+                  name: istory-db-secret
+                  key: MYSQL_PASSWORD
+            - name: spring.datasource.username
+              valueFrom:
+                secretKeyRef:
+                  name: istory-db-secret
+                  key: MYSQL_USER
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            timeoutSeconds: 3
+            successThreshold: 2
+            failureThreshold: 3
+            periodSeconds: 20
+          ports:
+            - containerPort:  3306
+              name: istory
+      volumes:
+        - name: application-config
+          configMap:
+            name: istory-app-config
+      restartPolicy: Always
