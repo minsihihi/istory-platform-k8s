@@ -1,33 +1,36 @@
 resources:
-  - ../../base/istory-app
-  - ../../base/istory-db
+- ../../base/istory-app
+- ../../base/istory-db
 
 namespace: istory-dev
 
-patches:
-  - path: patch-lb-annotations.yml
-    target:
-      kind: Service
-      name: istory-app-lb
 
-  - path: patch-deploy.yml
-    target:
-      kind: Deployment
-      name: istory-app-deploy
+patches:
+- path: patch-lb-annotations.yml
+  target:
+    kind: Service
+    name: istory-app-lb
+- path: patch-deploy.yml
+  target:
+    kind: Deployment
+    name: istory-app-deploy
 
 secretGenerator:
-  - name: istory-db-secret
-    envs:
-      - .env.secret
+- envs:
+  - .env.secret
+  name: istory-db-secret
     # 아래 양식으로 .env.secret 파일을 만드세요
     # MYSQL_USER=myuser
     # MYSQL_PASSWORD=myuserpassword
     # MYSQL_ROOT_PASSWORD=myrootpassword
 
-images:
   # base/istory-app/istory-app-deploy.yml 내의 이미지 이름과 동일해야 변경됨
-  - name: minsihihi/istory # 변경필요
-    newTag: latest
+images:
+- name: minsihihi/istory
+  newName: minsihihi/istory
+  newTag: "4"
 
 generatorOptions:
   disableNameSuffixHash: true
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
